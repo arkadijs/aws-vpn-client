@@ -1,14 +1,12 @@
-#!/bin/bash
-
-set -e
+#!/bin/bash -e
 
 # replace with your hostname
 VPN_HOST="cvpn-endpoint-<id>.prod.clientvpn.us-east-1.amazonaws.com"
 # path to the patched openvpn
-OVPN_BIN="./openvpn"
+OVPN_BIN="./openvpn.$(uname -s)_$(uname -m)"
 # path to the configuration file
 OVPN_CONF="vpn.conf"
-PORT=1194
+PORT=443
 PROTO=udp
 
 wait_file() {
@@ -25,25 +23,26 @@ RAND=$(openssl rand -hex 12)
 SRV=$(dig a +short "${RAND}.${VPN_HOST}"|head -n1)
 
 # cleanup
-rm -f saml-response.txt
+rm -f response.txt saml-response.txt
 
 echo "Getting SAML redirect URL from the AUTH_FAILED response (host: ${SRV}:${PORT})"
-OVPN_OUT=$($OVPN_BIN --config "${OVPN_CONF}" --verb 3 \
-     --proto "$PROTO" --remote "${SRV}" "${PORT}" \
-     --auth-user-pass <( printf "%s\n%s\n" "N/A" "ACS::35001" ) \
-    2>&1 | grep AUTH_FAILED,CRV1)
+$OVPN_BIN --config "${OVPN_CONF}" --verb 3 \
+    --proto "$PROTO" --remote "${SRV}" "${PORT}" \
+    --auth-user-pass <( printf "%s\n%s\n" "N/A" "ACS::35001" ) \
+    2>&1 | tee response.txt
+
+OVPN_OUT=$(grep AUTH_FAILED,CRV1 response.txt)
 
 echo "Opening browser and wait for the response file..."
 URL=$(echo "$OVPN_OUT" | grep -Eo 'https://.+')
 
-unameOut="$(uname -s)"
-case "${unameOut}" in
+case $(uname -s) in
     Linux*)     xdg-open "$URL";;
     Darwin*)    open "$URL";;
     *)          echo "Could not determine 'open' command for this OS"; exit 1;;
 esac
 
-wait_file "saml-response.txt" 30 || {
+wait_file "saml-response.txt" 100 || {
   echo "SAML Authentication time out"
   exit 1
 }
@@ -59,5 +58,5 @@ sudo bash -c "$OVPN_BIN --config "${OVPN_CONF}" \
     --verb 3 --auth-nocache --inactive 3600 \
     --proto "$PROTO" --remote $SRV $PORT \
     --script-security 2 \
-    --route-up '/bin/rm saml-response.txt' \
+    --route-up '/bin/rm response.txt saml-response.txt' \
     --auth-user-pass <( printf \"%s\n%s\n\" \"N/A\" \"CRV1::${VPN_SID}::$(cat saml-response.txt)\" )"

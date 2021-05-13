@@ -1,4 +1,14 @@
-# aws-vpn-client
+Open two terminal windows (or tabs). Run `./samlserver` in one, then run `./aws-connect.sh` in another. Re-enter O365 password in the browser. The VPN should be up with 10/8 route setup to VPN gateway.
+
+#### macOS users
+
+Depending on your machine Security & Privacy settings and macOS version (10.15+), you may get an error _cannot be opened because the developer cannot be verified_. Please [read on](https://github.com/hashicorp/terraform/issues/23033#issuecomment-542302933) for a simple workaround.
+
+Alternativelly, to set global preference to _Allow apps downloaded from: Anywhere_, execute:
+
+    $ sudo spctl --master-disable
+
+## aws-vpn-client
 
 This is PoC to connect to the AWS Client VPN with OSS OpenVPN using SAML
 authentication. Tested on macOS and Linux, should also work on other POSIX OS with a minor changes.
