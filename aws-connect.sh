@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 # replace with your hostname
-VPN_HOST="cvpn-endpoint-0ab4dec2ff2af2947.prod.clientvpn.us-east-2.amazonaws.com"
+VPN_HOST="cvpn-endpoint-0010a3b30940d91aa.prod.clientvpn.eu-central-1.amazonaws.com"
 # path to the patched openvpn
 OVPN_BIN="./openvpn.$(uname -s)_$(uname -m)"
 # path to the configuration file

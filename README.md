@@ -1,4 +1,4 @@
-Open two terminal windows (or tabs). Run `./samlserver` in one, then run `./aws-connect.sh` in another. Re-enter O365 password in the browser. The VPN should be up with 10/8 route setup to VPN gateway.
+Open two terminal windows (or tabs). Run `./samlserver` in one, then run `./aws-connect.sh` in another. Proceed with Google account selection and confirm non-secure form submission. The VPN should be up with various 10.x/16 routes setup to VPN gateway.
 
 #### macOS users
 
